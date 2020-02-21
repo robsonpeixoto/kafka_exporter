@@ -332,22 +332,27 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				}
 
 				if e.useZooKeeperLag {
-					ConsumerGroups, err := e.zookeeperClient.Consumergroups()
+					consumerGroups, err := e.zookeeperClient.Consumergroups()
 
 					if err != nil {
 						plog.Errorf("Cannot get consumer group %v", err)
 					}
 
-					for _, group := range ConsumerGroups {
-						offset, _ := group.FetchOffset(topic, partition)
-						if offset > 0 {
-
-							consumerGroupLag := currentOffset - offset
-							ch <- prometheus.MustNewConstMetric(
-								consumergroupLagZookeeper, prometheus.GaugeValue, float64(consumerGroupLag), group.Name, topic, strconv.FormatInt(int64(partition), 10),
-							)
-						}
+					wgCG := sync.WaitGroup{}
+					for _, group := range consumerGroups {
+						wgCG.Add(1)
+						go func(group *kazoo.Consumergroup) {
+							defer wgCG.Done()
+							offset, _ := group.FetchOffset(topic, partition)
+							if offset > 0 {
+								consumerGroupLag := currentOffset - offset
+								ch <- prometheus.MustNewConstMetric(
+									consumergroupLagZookeeper, prometheus.GaugeValue, float64(consumerGroupLag), group.Name, topic, strconv.FormatInt(int64(partition), 10),
+								)
+							}
+						}(group)
 					}
+					wgCG.Wait()
 				}
 			}
 		}
