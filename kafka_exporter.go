@@ -74,6 +74,7 @@ type kafkaOpts struct {
 	kafkaVersion             string
 	useZooKeeperLag          bool
 	uriZookeeper             []string
+	chrootZookeeper          string
 	labels                   string
 	metadataRefreshInterval  string
 }
@@ -167,7 +168,9 @@ func NewExporter(opts kafkaOpts, topicFilter string, groupFilter string) (*Expor
 	}
 
 	if opts.useZooKeeperLag {
-		zookeeperClient, err = kazoo.NewKazoo(opts.uriZookeeper, nil)
+		zookeeperConfig := kazoo.NewConfig()
+		zookeeperConfig.Chroot = opts.chrootZookeeper
+		zookeeperClient, err = kazoo.NewKazoo(opts.uriZookeeper, zookeeperConfig)
 	}
 
 	interval, err := time.ParseDuration(opts.metadataRefreshInterval)
@@ -489,6 +492,7 @@ func main() {
 	kingpin.Flag("kafka.version", "Kafka broker version").Default(sarama.V1_0_0_0.String()).StringVar(&opts.kafkaVersion)
 	kingpin.Flag("use.consumelag.zookeeper", "if you need to use a group from zookeeper").Default("false").BoolVar(&opts.useZooKeeperLag)
 	kingpin.Flag("zookeeper.server", "Address (hosts) of zookeeper server.").Default("localhost:2181").StringsVar(&opts.uriZookeeper)
+	kingpin.Flag("zookeeper.chroot", "Zookeeper root path with Kafka data.").Default("").StringVar(&opts.chrootZookeeper)
 	kingpin.Flag("kafka.labels", "Kafka cluster name").Default("").StringVar(&opts.labels)
 	kingpin.Flag("refresh.metadata", "Metadata refresh interval").Default("30s").StringVar(&opts.metadataRefreshInterval)
 
