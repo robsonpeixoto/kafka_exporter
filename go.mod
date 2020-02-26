@@ -1,6 +1,6 @@
 module github.com/robsonpeixoto/kafka_exporter
 
-go 1.13
+go 1.14
 
 require (
 	github.com/Shopify/sarama v1.26.1
@@ -12,7 +12,7 @@ require (
 	github.com/rcrowley/go-metrics v0.0.0-20190826022208-cac0b30c2563
 	github.com/robsonpeixoto/kazoo-go v0.0.0-20200221150115-ca3d95b86cb2
 	github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da // indirect
-	golang.org/x/net v0.0.0-20200219183655-46282727080f // indirect
-	golang.org/x/sys v0.0.0-20200219091948-cb0a6d8edb6c // indirect
+	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b // indirect
+	golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
